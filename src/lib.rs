@@ -61,6 +61,56 @@ impl_logaddexp!(f32);
 //     }
 // }
 
+pub trait LogSumExp {
+    type Output;
+
+    fn ln_sum_exp(self) -> Self::Output;
+}
+
+impl<T> LogSumExp for T
+where
+    T: Iterator<Item = f64>,
+{
+    type Output = f64;
+    fn ln_sum_exp(self) -> Self::Output {
+        let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
+            if v_i != f64::NEG_INFINITY {
+                let m_new = m_old.max(v_i);
+                (m_new, sum * (m_old - m_new).exp() + (v_i - m_new).exp())
+            } else {
+                (m_old, sum)
+            }
+        });
+        if m_old == f64::INFINITY {
+            m_old
+        } else {
+            m_old + sum.ln()
+        }
+    }
+}
+
+// impl<'a, T> LogSumExp<'a> for T
+// where
+//     T: Iterator<Item = &'a f64>,
+// {
+//     type Output = f64;
+//     fn ln_sum_exp(self) -> Self::Output {
+//         let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
+//             if *v_i != f64::NEG_INFINITY {
+//                 let m_new = m_old.max(*v_i);
+//                 (m_new, sum * (m_old - m_new).exp() + (*v_i - m_new).exp())
+//             } else {
+//                 (m_old, sum)
+//             }
+//         });
+//         if m_old == f64::INFINITY {
+//             m_old
+//         } else {
+//             m_old + sum.ln()
+//         }
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -86,40 +136,38 @@ mod tests {
             assert!(nan.ln_add_exp(-x).is_nan());
             assert!(x.ln_add_exp(nan).is_nan());
             assert!((-x).ln_add_exp(nan).is_nan());
-
-            let xs: Vec<f64> = vec![0.0, 1.0, 2.0];
         }
 
-        // #[test]
-        // fn ln_sum_exp_works() {
-        //     let v1 = vec![f64::NEG_INFINITY; 4];
-        //     assert_eq!(v1.into_iter().ln_sum_exp::<f64>(), f64::NEG_INFINITY);
+        #[test]
+        fn ln_sum_exp_works() {
+            let v1 = vec![f64::NEG_INFINITY; 4];
+            assert_eq!(v1.into_iter().ln_sum_exp(), f64::NEG_INFINITY);
 
-        //     let v2 = vec![f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY, 0.5];
-        //     assert_eq!(v2.into_iter().ln_sum_exp(), 0.5);
+            let v2 = vec![f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY, 0.5];
+            assert_eq!(v2.into_iter().ln_sum_exp(), 0.5);
 
-        //     let v3 = vec![0.5, f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY];
-        //     assert_eq!(v3.into_iter().ln_sum_exp(), 0.5);
+            let v3 = vec![0.5, f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY];
+            assert_eq!(v3.into_iter().ln_sum_exp(), 0.5);
 
-        //     let v4 = vec![
-        //         f64::INFINITY,
-        //         f64::NEG_INFINITY,
-        //         f64::NEG_INFINITY,
-        //         f64::NEG_INFINITY,
-        //     ];
-        //     assert_eq!(v4.into_iter().ln_sum_exp(), f64::INFINITY);
+            let v4 = vec![
+                f64::INFINITY,
+                f64::NEG_INFINITY,
+                f64::NEG_INFINITY,
+                f64::NEG_INFINITY,
+            ];
+            assert_eq!(v4.into_iter().ln_sum_exp(), f64::INFINITY);
 
-        //     let v5 = vec![f64::INFINITY; 4];
-        //     assert_eq!(v5.into_iter().ln_sum_exp(), f64::INFINITY);
+            let v5 = vec![f64::INFINITY; 4];
+            assert_eq!(v5.into_iter().ln_sum_exp(), f64::INFINITY);
 
-        //     let v6 = vec![
-        //         f64::NEG_INFINITY,
-        //         f64::NEG_INFINITY,
-        //         f64::NEG_INFINITY,
-        //         f64::INFINITY,
-        //     ];
-        //     assert_eq!(v6.into_iter().ln_sum_exp(), f64::INFINITY);
-        // }
+            let v6 = vec![
+                f64::NEG_INFINITY,
+                f64::NEG_INFINITY,
+                f64::NEG_INFINITY,
+                f64::INFINITY,
+            ];
+            assert_eq!(v6.into_iter().ln_sum_exp(), f64::INFINITY);
+        }
     }
 
     #[cfg(test)]

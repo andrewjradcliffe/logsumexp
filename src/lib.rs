@@ -165,12 +165,15 @@ mod tests {
         #[test]
         fn ln_sum_exp_works() {
             let v1 = vec![f64::NEG_INFINITY; 4];
+            assert_eq!(v1.iter().ln_sum_exp(), f64::NEG_INFINITY);
             assert_eq!(v1.into_iter().ln_sum_exp(), f64::NEG_INFINITY);
 
             let v2 = vec![f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY, 0.5];
+            assert_eq!(v2.iter().ln_sum_exp(), 0.5);
             assert_eq!(v2.into_iter().ln_sum_exp(), 0.5);
 
             let v3 = vec![0.5, f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY];
+            assert_eq!(v3.iter().ln_sum_exp(), 0.5);
             assert_eq!(v3.into_iter().ln_sum_exp(), 0.5);
 
             let v4 = vec![
@@ -179,9 +182,11 @@ mod tests {
                 f64::NEG_INFINITY,
                 f64::NEG_INFINITY,
             ];
+            assert_eq!(v4.iter().ln_sum_exp(), f64::INFINITY);
             assert_eq!(v4.into_iter().ln_sum_exp(), f64::INFINITY);
 
             let v5 = vec![f64::INFINITY; 4];
+            assert_eq!(v5.iter().ln_sum_exp(), f64::INFINITY);
             assert_eq!(v5.into_iter().ln_sum_exp(), f64::INFINITY);
 
             let v6 = vec![
@@ -190,7 +195,46 @@ mod tests {
                 f64::NEG_INFINITY,
                 f64::INFINITY,
             ];
+            assert_eq!(v6.iter().ln_sum_exp(), f64::INFINITY);
             assert_eq!(v6.into_iter().ln_sum_exp(), f64::INFINITY);
+
+            let v7: Vec<f64> = vec![];
+            assert_eq!(v7.iter().ln_sum_exp(), f64::NEG_INFINITY);
+            assert_eq!(v7.into_iter().ln_sum_exp(), f64::NEG_INFINITY);
+
+            let v8 = vec![
+                f64::INFINITY,
+                f64::NEG_INFINITY,
+                f64::NEG_INFINITY,
+                f64::INFINITY,
+            ];
+            assert_eq!(v8.iter().ln_sum_exp(), f64::INFINITY);
+            assert_eq!(v8.into_iter().ln_sum_exp(), f64::INFINITY);
+
+            let nan: f64 = 0.0 / 0.0;
+            let v9 = vec![1.5, 1.0, nan];
+            assert!(v9.iter().ln_sum_exp().is_nan());
+            let v10 = vec![nan];
+            assert!(v10.iter().ln_sum_exp().is_nan());
+            let v11 = vec![nan, 1.5, 1.0];
+            assert!(v11.iter().ln_sum_exp().is_nan());
+            let v12 = vec![1.5, nan, 1.0];
+            assert!(v12.iter().ln_sum_exp().is_nan());
+
+            let v13 = vec![nan; 3];
+            assert!(v13.iter().ln_sum_exp().is_nan());
+
+            let v14 = vec![nan, 1.5, f64::INFINITY];
+            assert!(v14.into_iter().ln_sum_exp().is_nan());
+
+            let v15 = vec![nan, f64::INFINITY];
+            assert!(v15.iter().ln_sum_exp().is_nan());
+
+            let v16 = vec![f64::INFINITY, f64::NEG_INFINITY, nan];
+            assert!(v16.iter().ln_sum_exp().is_nan());
+
+            let v17 = vec![f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, nan];
+            assert!(v17.iter().ln_sum_exp().is_nan());
         }
     }
 }

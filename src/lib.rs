@@ -168,21 +168,41 @@ mod tests {
         #[test]
         fn ln_add_exp_works() {
             let inf = f64::INFINITY;
+            let nan: f64 = 0.0 / 0.0;
             let x: f64 = inf;
             assert_eq!(x.ln_add_exp(inf), inf);
             assert_eq!(x.ln_add_exp(-inf), inf);
+            assert_eq!(x.ln_add_exp(0.5), inf);
+            assert_eq!((0.5_f64).ln_add_exp(x), inf);
 
             let x: f64 = -inf;
             assert_eq!(x.ln_add_exp(inf), inf);
-            let x: f64 = -inf;
             assert_eq!(x.ln_add_exp(-inf), -inf);
+            assert_eq!(x.ln_add_exp(0.5), 0.5);
+            assert_eq!((0.5_f64).ln_add_exp(x), 0.5);
 
-            let nan: f64 = 0.0 / 0.0;
+            assert!(nan.ln_add_exp(inf).is_nan());
+            assert!(nan.ln_add_exp(-inf).is_nan());
+            assert!(inf.ln_add_exp(nan).is_nan());
+            assert!((-inf).ln_add_exp(nan).is_nan());
+
             let x: f64 = 0.65;
             assert!(nan.ln_add_exp(x).is_nan());
             assert!(nan.ln_add_exp(-x).is_nan());
             assert!(x.ln_add_exp(nan).is_nan());
             assert!((-x).ln_add_exp(nan).is_nan());
+        }
+
+        #[test]
+        fn ln_add_exp_works_argtypes() {
+            let x: f64 = 0.5;
+            let y: f64 = 1.0;
+            let z: f64 = (x.exp() + y.exp()).ln();
+            assert_eq!(x.ln_add_exp(y), z);
+            assert_eq!(x.ln_add_exp(&y), z);
+            let x_ref = &x;
+            assert_eq!(x_ref.ln_add_exp(y), z);
+            assert_eq!(x_ref.ln_add_exp(&y), z);
         }
 
         #[test]

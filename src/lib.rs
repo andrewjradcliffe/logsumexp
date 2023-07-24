@@ -61,18 +61,65 @@ impl_logaddexp!(f32);
 //     }
 // }
 
-pub trait LogSumExp {
-    type Output;
+// pub trait LogSumExp {
+//     type Output;
 
-    fn ln_sum_exp(self) -> Self::Output;
+//     fn ln_sum_exp(self) -> Self::Output;
+// }
+
+// impl<T> LogSumExp for T
+// where
+//     T: Iterator<Item = f64>,
+// {
+//     type Output = f64;
+//     fn ln_sum_exp(self) -> Self::Output {
+//         let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
+//             if v_i != f64::NEG_INFINITY {
+//                 let m_new = m_old.max(v_i);
+//                 (m_new, sum * (m_old - m_new).exp() + (v_i - m_new).exp())
+//             } else {
+//                 (m_old, sum)
+//             }
+//         });
+//         if m_old == f64::INFINITY {
+//             m_old
+//         } else {
+//             m_old + sum.ln()
+//         }
+//     }
+// }
+
+// impl<'a, T> LogSumExp for T
+// where
+//     T: Iterator<Item = &'a f64>,
+// {
+//     type Output = f64;
+//     fn ln_sum_exp(self) -> Self::Output {
+//         let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
+//             if *v_i != f64::NEG_INFINITY {
+//                 let m_new = m_old.max(*v_i);
+//                 (m_new, sum * (m_old - m_new).exp() + (*v_i - m_new).exp())
+//             } else {
+//                 (m_old, sum)
+//             }
+//         });
+//         if m_old == f64::INFINITY {
+//             m_old
+//         } else {
+//             m_old + sum.ln()
+//         }
+//     }
+// }
+
+pub trait LogSumExp<T> {
+    fn ln_sum_exp(self) -> T;
 }
-
-impl<T> LogSumExp for T
+impl<U> LogSumExp<f64> for U
 where
-    T: Iterator<Item = f64>,
+    U: Iterator<Item = f64>,
 {
-    type Output = f64;
-    fn ln_sum_exp(self) -> Self::Output {
+    // type Output = f64;
+    fn ln_sum_exp(self) -> f64 {
         let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
             if v_i != f64::NEG_INFINITY {
                 let m_new = m_old.max(v_i);

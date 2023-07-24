@@ -35,15 +35,22 @@ macro_rules! impl_logaddexp {
 }
 impl_logaddexp! { f64 f32 }
 
-pub trait LogSumExp<T> {
+/// A trait for computing the log of the sum of exponentials of a sequence
+/// in a numerically stable manner, using a 1-pass algorithm based on
+/// [Milakov, Maxim, and Natalia Gimelshein. "Online normalizer calculation for softmax." arXiv preprint arXiv:1805.02867 (2018)](https://arxiv.org/pdf/1805.02867.pdf).
+/// In contrast to the original, this algorithm correctly handles +/-infinity and `nan` values
+/// at any point in the sequence.
+pub trait LogSumExp<T, U: Iterator<Item = T>> {
     type Output;
+
+    /// Return the `ln(∑ᵢ₌₀ⁿ⁻¹ exp(vᵢ))`
     fn ln_sum_exp(self) -> Self::Output;
 }
 
 macro_rules! impl_logsumexp {
     { $($f:ident)+ } => {
         $(
-            impl<U> LogSumExp<$f> for U
+            impl<U> LogSumExp<$f, U> for U
             where
                 U: Iterator<Item = $f>,
             {
@@ -80,7 +87,7 @@ macro_rules! impl_logsumexp {
                 }
             }
 
-            impl<'a, U> LogSumExp<&'a $f> for U
+            impl<'a, U> LogSumExp<&'a $f, U> for U
             where
                 U: Iterator<Item = &'a $f>,
             {
@@ -89,14 +96,9 @@ macro_rules! impl_logsumexp {
                     let mut m_old = $f::NEG_INFINITY;
                     let mut sum: $f = 0.0;
                     while let Some(v_i) = self.next() {
-                     // This is the concept, but it can probably invoke fewer branches.
                         if *v_i == $f::NEG_INFINITY {
-                            // Of the special cases, -inf is the most likely, hence,
-                            // check for it first.
                             continue
                         } else if *v_i == $f::INFINITY {
-                            // inf should be more likely than nan, under reasonable
-                            // circumstances.
                             while let Some(v_i) = self.next() {
                                 if v_i.is_nan() {
                                     return *v_i
@@ -104,10 +106,8 @@ macro_rules! impl_logsumexp {
                             }
                             return $f::INFINITY
                         } else if v_i.is_nan() {
-                            // The check for nan is unavoidable.
                             return *v_i
                         } else {
-                            // finite and not nan
                             let m_new = m_old.max(*v_i);
                             sum = sum * (m_old - m_new).exp() + (*v_i - m_new).exp();
                             m_old = m_new;
@@ -385,6 +385,25 @@ mod tests {
                     let v: Vec<$f> = vec![inf, neg_inf, nan];
                     assert!(v.iter().ln_sum_exp().is_nan());
                     assert!(v.into_iter().ln_sum_exp().is_nan());
+                }
+
+                #[test]
+                fn ln_sum_exp_iterators_works() {
+                    let v: Vec<$f> = vec![0.5, 1.0, 1.5];
+                    let iter = v.iter().map(|&x| x);
+                    assert_eq!(v.iter().ln_sum_exp(), iter.ln_sum_exp());
+
+                    let iter = v.iter().map(|x| x.ln());
+                    let rhs: $f = $f::ln(3.0);
+                    assert!((iter.ln_sum_exp() -  rhs).abs() < 2.0 * $f::EPSILON);
+
+                    let into_iter = v.into_iter().map(|x| x.ln());
+                    let rhs: $f = $f::ln(3.0);
+                    assert!((into_iter.ln_sum_exp() -  rhs).abs() < 2.0 * $f::EPSILON);
+
+                    let into_iter = (1..4_i32).map(|x| x as $f).map(|x| x.ln());
+                    let rhs: $f = $f::ln(6.0);
+                    assert!((into_iter.ln_sum_exp() -  rhs).abs() < 2.0 * $f::EPSILON);
                 }
             }
         }

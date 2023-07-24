@@ -404,6 +404,12 @@ mod tests {
                     let into_iter = (1..4_i32).map(|x| x as $f).map(|x| x.ln());
                     let rhs: $f = $f::ln(6.0);
                     assert!((into_iter.ln_sum_exp() -  rhs).abs() < 2.0 * $f::EPSILON);
+
+                    use std::collections::HashMap;
+                    let map: HashMap<i32, $f> = HashMap::from([(1, 0.5), (2, 1.0), (3, 1.5)]);
+                    let iter = map.values().map(|x| x.ln());
+                    let rhs: $f = $f::ln(3.0);
+                    assert!((iter.ln_sum_exp() -  rhs).abs() < 2.0 * $f::EPSILON);
                 }
             }
         }

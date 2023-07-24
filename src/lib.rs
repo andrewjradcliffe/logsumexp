@@ -52,52 +52,31 @@ macro_rules! impl_logsumexp {
                     let mut m_old = $f::NEG_INFINITY;
                     let mut sum: $f = 0.0;
                     while let Some(v_i) = self.next() {
-                        // if v_i != $f::NEG_INFINITY {
-                        //     if v_i.is_nan() {
-                        //         return v_i
-                        //     } else {
-                        //         let m_new = m_old.max(v_i);
-                        //         sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
-                        //         m_old = m_new;
-                        //     }
-                        // }
-                        if v_i != $f::NEG_INFINITY {
-                            if v_i.is_nan() {
-                                return v_i
-                            } else if v_i == $f::INFINITY {
-                                while let Some(v_i) = self.next() {
-                                    if v_i.is_nan() {
-                                        return v_i
-                                    }
+                        // This is the concept, but it can probably invoke fewer branches.
+                        if v_i == $f::NEG_INFINITY {
+                            // Of the special cases, -inf is the most likely, hence,
+                            // check for it first.
+                            continue
+                        } else if v_i == $f::INFINITY {
+                            // inf should be more likely than nan, under reasonable
+                            // circumstances.
+                            while let Some(v_i) = self.next() {
+                                if v_i.is_nan() {
+                                    return v_i
                                 }
-                                return $f::INFINITY
-                            } else {
-                                let m_new = m_old.max(v_i);
-                                sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
-                                m_old = m_new;
                             }
+                            return $f::INFINITY
+                        } else if v_i.is_nan() {
+                            // The check for nan is unavoidable.
+                            return v_i
+                        } else {
+                            // finite and not nan
+                            let m_new = m_old.max(v_i);
+                            sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
+                            m_old = m_new;
                         }
-                        // if v_i.is_finite() {
-                        //     let m_new = m_old.max(v_i);
-                        //     sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
-                        //     m_old = m_new;
-                        // } else if v_i == $f::INFINITY {
-                        //     while let Some(v_i) = self.next() {
-                        //         if v_i.is_nan() {
-                        //             return v_i
-                        //         }
-                        //     }
-                        //     return $f::INFINITY
-                        // } else if v_i.is_nan() {
-                        //     return v_i
-                        // }
                     }
                     m_old + sum.ln()
-                    // if m_old == $f::INFINITY {
-                    //     m_old
-                    // } else {
-                    //     m_old + sum.ln()
-                    // }
                 }
             }
 
@@ -110,21 +89,31 @@ macro_rules! impl_logsumexp {
                     let mut m_old = $f::NEG_INFINITY;
                     let mut sum: $f = 0.0;
                     while let Some(v_i) = self.next() {
-                        if *v_i != $f::NEG_INFINITY {
-                            if v_i.is_nan() {
-                                return *v_i
-                            } else {
-                                let m_new = m_old.max(*v_i);
-                                sum = sum * (m_old - m_new).exp() + (*v_i - m_new).exp();
-                                m_old = m_new;
+                     // This is the concept, but it can probably invoke fewer branches.
+                        if *v_i == $f::NEG_INFINITY {
+                            // Of the special cases, -inf is the most likely, hence,
+                            // check for it first.
+                            continue
+                        } else if *v_i == $f::INFINITY {
+                            // inf should be more likely than nan, under reasonable
+                            // circumstances.
+                            while let Some(v_i) = self.next() {
+                                if v_i.is_nan() {
+                                    return *v_i
+                                }
                             }
+                            return $f::INFINITY
+                        } else if v_i.is_nan() {
+                            // The check for nan is unavoidable.
+                            return *v_i
+                        } else {
+                            // finite and not nan
+                            let m_new = m_old.max(*v_i);
+                            sum = sum * (m_old - m_new).exp() + (*v_i - m_new).exp();
+                            m_old = m_new;
                         }
                     }
-                    if m_old == $f::INFINITY {
-                        m_old
-                    } else {
-                        m_old + sum.ln()
-                    }
+                    m_old + sum.ln()
                 }
             }
         )+

@@ -52,21 +52,52 @@ macro_rules! impl_logsumexp {
                     let mut m_old = $f::NEG_INFINITY;
                     let mut sum: $f = 0.0;
                     while let Some(v_i) = self.next() {
+                        // if v_i != $f::NEG_INFINITY {
+                        //     if v_i.is_nan() {
+                        //         return v_i
+                        //     } else {
+                        //         let m_new = m_old.max(v_i);
+                        //         sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
+                        //         m_old = m_new;
+                        //     }
+                        // }
                         if v_i != $f::NEG_INFINITY {
                             if v_i.is_nan() {
                                 return v_i
+                            } else if v_i == $f::INFINITY {
+                                while let Some(v_i) = self.next() {
+                                    if v_i.is_nan() {
+                                        return v_i
+                                    }
+                                }
+                                return $f::INFINITY
                             } else {
                                 let m_new = m_old.max(v_i);
                                 sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
                                 m_old = m_new;
                             }
                         }
+                        // if v_i.is_finite() {
+                        //     let m_new = m_old.max(v_i);
+                        //     sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
+                        //     m_old = m_new;
+                        // } else if v_i == $f::INFINITY {
+                        //     while let Some(v_i) = self.next() {
+                        //         if v_i.is_nan() {
+                        //             return v_i
+                        //         }
+                        //     }
+                        //     return $f::INFINITY
+                        // } else if v_i.is_nan() {
+                        //     return v_i
+                        // }
                     }
-                    if m_old == $f::INFINITY {
-                        m_old
-                    } else {
-                        m_old + sum.ln()
-                    }
+                    m_old + sum.ln()
+                    // if m_old == $f::INFINITY {
+                    //     m_old
+                    // } else {
+                    //     m_old + sum.ln()
+                    // }
                 }
             }
 
@@ -214,27 +245,36 @@ mod tests {
             let nan: f64 = 0.0 / 0.0;
             let v9 = vec![1.5, 1.0, nan];
             assert!(v9.iter().ln_sum_exp().is_nan());
+            assert!(v9.into_iter().ln_sum_exp().is_nan());
             let v10 = vec![nan];
             assert!(v10.iter().ln_sum_exp().is_nan());
+            assert!(v10.into_iter().ln_sum_exp().is_nan());
             let v11 = vec![nan, 1.5, 1.0];
             assert!(v11.iter().ln_sum_exp().is_nan());
+            assert!(v11.into_iter().ln_sum_exp().is_nan());
             let v12 = vec![1.5, nan, 1.0];
             assert!(v12.iter().ln_sum_exp().is_nan());
+            assert!(v12.into_iter().ln_sum_exp().is_nan());
 
             let v13 = vec![nan; 3];
             assert!(v13.iter().ln_sum_exp().is_nan());
+            assert!(v13.into_iter().ln_sum_exp().is_nan());
 
             let v14 = vec![nan, 1.5, f64::INFINITY];
+            assert!(v14.iter().ln_sum_exp().is_nan());
             assert!(v14.into_iter().ln_sum_exp().is_nan());
 
             let v15 = vec![nan, f64::INFINITY];
             assert!(v15.iter().ln_sum_exp().is_nan());
+            assert!(v15.into_iter().ln_sum_exp().is_nan());
 
             let v16 = vec![f64::INFINITY, f64::NEG_INFINITY, nan];
             assert!(v16.iter().ln_sum_exp().is_nan());
+            assert!(v16.into_iter().ln_sum_exp().is_nan());
 
             let v17 = vec![f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, nan];
             assert!(v17.iter().ln_sum_exp().is_nan());
+            assert!(v17.into_iter().ln_sum_exp().is_nan());
         }
     }
 }

@@ -36,14 +36,14 @@ macro_rules! impl_logaddexp {
 impl_logaddexp! { f64 f32 }
 
 /// A trait for computing the log of the sum of exponentials of a sequence
-/// in a numerically stable manner, using a 1-pass algorithm based on
+/// in a numerically-stable manner, using a 1-pass algorithm based on
 /// [Milakov, Maxim, and Natalia Gimelshein. "Online normalizer calculation for softmax." arXiv preprint arXiv:1805.02867 (2018)](https://arxiv.org/pdf/1805.02867.pdf).
 /// In contrast to the original, this algorithm correctly handles +/-infinity and `nan` values
 /// at any point in the sequence.
 pub trait LogSumExp<T, U: Iterator<Item = T>> {
     type Output;
 
-    /// Return the `ln(∑ᵢ₌₀ⁿ⁻¹ exp(vᵢ))`
+    /// Return the [LogSumExp](https://en.wikipedia.org/wiki/LogSumExp) of the sequence.
     fn ln_sum_exp(self) -> Self::Output;
 }
 

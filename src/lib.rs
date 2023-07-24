@@ -145,26 +145,48 @@ mod tests {
                 #[test]
                 fn ln_add_exp_works() {
                     let inf = $f::INFINITY;
-                    let nan: $f = 0.0 / 0.0;
-                    let x: $f = inf;
-                    let y: $f = 0.5;
-                    assert_eq!(x.ln_add_exp(inf), inf);
-                    assert_eq!(x.ln_add_exp(-inf), inf);
-                    assert_eq!(x.ln_add_exp(y), inf);
-                    assert_eq!(y.ln_add_exp(x), inf);
+                    let nan: $f = $f::NAN;
 
-                    let x: $f = -inf;
-                    assert_eq!(x.ln_add_exp(inf), inf);
-                    assert_eq!(x.ln_add_exp(-inf), -inf);
-                    assert_eq!(x.ln_add_exp(y), y);
-                    assert_eq!(y.ln_add_exp(x), y);
+                    // Cases involving +/-inf
+                    let u: $f = inf;
+                    let v: $f = inf;
+                    assert_eq!(u.ln_add_exp(v), inf);
 
+                    let u: $f = -inf;
+                    let v: $f = -inf;
+                    assert_eq!(u.ln_add_exp(v), -inf);
+
+                    let u: $f = inf;
+                    let v: $f = -inf;
+                    assert_eq!(u.ln_add_exp(v), inf);
+
+                    let u: $f = -inf;
+                    let v: $f = inf;
+                    assert_eq!(u.ln_add_exp(v), inf);
+
+                    let u: $f = inf;
+                    let v: $f = 0.5;
+                    assert_eq!(u.ln_add_exp(v), inf);
+
+                    let u: $f = -inf;
+                    let v: $f = 0.5;
+                    assert_eq!(u.ln_add_exp(v), v);
+
+                    let u: $f = 0.5;
+                    let v: $f = inf;
+                    assert_eq!(u.ln_add_exp(v), inf);
+
+                    let u: $f = 0.5;
+                    let v: $f = -inf;
+                    assert_eq!(u.ln_add_exp(v), u);
+
+                    // Cases involving nan
                     assert!(nan.ln_add_exp(inf).is_nan());
                     assert!(nan.ln_add_exp(-inf).is_nan());
                     assert!(inf.ln_add_exp(nan).is_nan());
                     assert!((-inf).ln_add_exp(nan).is_nan());
 
-                    let x: $f = 0.65;
+                    let x: $f = 0.5;
                     assert!(nan.ln_add_exp(x).is_nan());
                     assert!(nan.ln_add_exp(-x).is_nan());
                     assert!(x.ln_add_exp(nan).is_nan());

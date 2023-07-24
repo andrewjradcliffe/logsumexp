@@ -211,6 +211,9 @@ mod tests {
         }
     }
 
+    ln_add_exp_tests! { f64_logaddexp_impl f64 }
+    ln_add_exp_tests! { f32_logaddexp_impl f32 }
+
     #[cfg(test)]
     mod f64_logsumexp_impl {
         use super::*;
@@ -246,7 +249,4 @@ mod tests {
             assert_eq!(v6.into_iter().ln_sum_exp(), f64::INFINITY);
         }
     }
-
-    ln_add_exp_tests! { f64_logaddexp_impl f64 }
-    ln_add_exp_tests! { f32_logaddexp_impl f32 }
 }

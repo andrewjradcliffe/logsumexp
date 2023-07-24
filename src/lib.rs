@@ -44,6 +44,26 @@ pub trait LogSumExp<T, U: Iterator<Item = T>> {
     type Output;
 
     /// Return the [LogSumExp](https://en.wikipedia.org/wiki/LogSumExp) of the sequence.
+    ///
+    /// # Examples
+    /// ```
+    /// use logsumexp::LogSumExp;
+    ///
+    /// let v: Vec<f64> = [0.5_f64, 0.3, 0.1, 0.7].into_iter().map(|x| x.ln()).collect();
+    /// let rhs: f64 = (1.6_f64).ln();
+    /// assert!((v.iter().ln_sum_exp() -  rhs).abs() < f64::EPSILON);
+    ///
+    /// let v = (0..10).into_iter().map(|x| (x as f64).ln());
+    /// let rhs: f64 = (45.0_f64).ln();
+    /// assert_eq!(v.ln_sum_exp(), rhs);
+    ///
+    /// // mean on the log scale; useful when working with many small (log-)probabilities
+    /// let v: Vec<f64> = vec![0.1, 0.2, 0.3, 0.4, 0.5];
+    /// let n = v.len();
+    /// let rhs: f64 = 0.3;
+    /// let log_mean = v.into_iter().map(|x| x.ln()).ln_sum_exp() - (n as f64).ln();
+    /// assert!((log_mean.exp() - rhs).abs() < f64::EPSILON);
+    /// ```
     fn ln_sum_exp(self) -> Self::Output;
 }
 

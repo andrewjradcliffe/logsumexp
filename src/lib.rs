@@ -1,162 +1,106 @@
 use lnexp::LnExp;
-pub trait LogAddExp {
-    fn ln_add_exp(&self, other: Self) -> Self;
+
+pub trait LogAddExp<Rhs = Self> {
+    type Output;
+    fn ln_add_exp(&self, rhs: Rhs) -> Self::Output;
 }
 
 macro_rules! impl_logaddexp {
-    ( $f:ident ) => {
-        impl LogAddExp for $f {
-            fn ln_add_exp(&self, other: $f) -> $f {
-                // if *self == other {
-                //     *self + std::$f::consts::LN_2
-                // } else {
-                //     let (max, diff) = if *self < other {
-                //         (other, *self - other)
-                //     } else {
-                //         (*self, other - *self)
-                //     };
-                //     max + diff.ln_1p_exp()
-                // }
-                let (max, diff) = if *self < other {
-                    (other, *self - other)
-                } else {
-                    if *self == other {
-                        (other, 0.0)
+    { $($f:ident)+ } => {
+        $(
+            impl LogAddExp for $f {
+                type Output = $f;
+                fn ln_add_exp(&self, rhs: Self) -> Self::Output {
+                    let (max, diff) = if *self < rhs {
+                        (rhs, *self - rhs)
                     } else {
-                        (*self, other - *self)
-                    }
-                };
-                max + diff.ln_1p_exp()
+                        if *self == rhs {
+                            (rhs, 0.0)
+                        } else {
+                            (*self, rhs - *self)
+                        }
+                    };
+                    max + diff.ln_1p_exp()
+                }
             }
-        }
-        // impl<'a> LogAddExp for &'a $f {
-        //     fn ln_add_exp(&self, other: &'a $f) -> $f {
-        //         self.ln_add_exp(*other)
-        //     }
-        // }
+            impl LogAddExp<&$f> for $f {
+                type Output = $f;
+                fn ln_add_exp(&self, rhs: &$f) -> Self::Output {
+                    self.ln_add_exp(*rhs)
+                }
+            }
+        )+
+
     };
 }
-impl_logaddexp!(f64);
-impl_logaddexp!(f32);
-
-// pub trait LogSumExp<A = Self>: Sized {
-//     fn ln_sum_exp<I: Iterator<Item = A>>(iter: I) -> Self;
-// }
-
-// impl LogSumExp for f64 {
-//     fn ln_sum_exp<I: Iterator<Item = Self>>(iter: I) -> Self {
-//         let (m_old, sum) = iter.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
-//             if v_i != f64::NEG_INFINITY {
-//                 let m_new = m_old.max(v_i);
-//                 (m_new, sum * (m_old - m_new).exp() + (v_i - m_new).exp())
-//             } else {
-//                 (m_old, sum)
-//             }
-//         });
-//         if m_old == f64::INFINITY {
-//             m_old
-//         } else {
-//             m_old + sum.ln()
-//         }
-//     }
-// }
-
-// pub trait LogSumExp {
-//     type Output;
-
-//     fn ln_sum_exp(self) -> Self::Output;
-// }
-
-// impl<T> LogSumExp for T
-// where
-//     T: Iterator<Item = f64>,
-// {
-//     type Output = f64;
-//     fn ln_sum_exp(self) -> Self::Output {
-//         let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
-//             if v_i != f64::NEG_INFINITY {
-//                 let m_new = m_old.max(v_i);
-//                 (m_new, sum * (m_old - m_new).exp() + (v_i - m_new).exp())
-//             } else {
-//                 (m_old, sum)
-//             }
-//         });
-//         if m_old == f64::INFINITY {
-//             m_old
-//         } else {
-//             m_old + sum.ln()
-//         }
-//     }
-// }
-
-// impl<'a, T> LogSumExp for T
-// where
-//     T: Iterator<Item = &'a f64>,
-// {
-//     type Output = f64;
-//     fn ln_sum_exp(self) -> Self::Output {
-//         let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
-//             if *v_i != f64::NEG_INFINITY {
-//                 let m_new = m_old.max(*v_i);
-//                 (m_new, sum * (m_old - m_new).exp() + (*v_i - m_new).exp())
-//             } else {
-//                 (m_old, sum)
-//             }
-//         });
-//         if m_old == f64::INFINITY {
-//             m_old
-//         } else {
-//             m_old + sum.ln()
-//         }
-//     }
-// }
+impl_logaddexp! { f64 f32 }
 
 pub trait LogSumExp<T> {
-    fn ln_sum_exp(self) -> T;
-}
-impl<U> LogSumExp<f64> for U
-where
-    U: Iterator<Item = f64>,
-{
-    // type Output = f64;
-    fn ln_sum_exp(self) -> f64 {
-        let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
-            if v_i != f64::NEG_INFINITY {
-                let m_new = m_old.max(v_i);
-                (m_new, sum * (m_old - m_new).exp() + (v_i - m_new).exp())
-            } else {
-                (m_old, sum)
-            }
-        });
-        if m_old == f64::INFINITY {
-            m_old
-        } else {
-            m_old + sum.ln()
-        }
-    }
+    type Output;
+    fn ln_sum_exp(self) -> Self::Output;
 }
 
-// impl<'a, T> LogSumExp<'a> for T
-// where
-//     T: Iterator<Item = &'a f64>,
-// {
-//     type Output = f64;
-//     fn ln_sum_exp(self) -> Self::Output {
-//         let (m_old, sum) = self.fold((f64::NEG_INFINITY, 0.0), |(m_old, sum), v_i| {
-//             if *v_i != f64::NEG_INFINITY {
-//                 let m_new = m_old.max(*v_i);
-//                 (m_new, sum * (m_old - m_new).exp() + (*v_i - m_new).exp())
-//             } else {
-//                 (m_old, sum)
-//             }
-//         });
-//         if m_old == f64::INFINITY {
-//             m_old
-//         } else {
-//             m_old + sum.ln()
-//         }
-//     }
-// }
+macro_rules! impl_logsumexp {
+    { $($f:ident)+ } => {
+        $(
+            impl<U> LogSumExp<$f> for U
+            where
+                U: Iterator<Item = $f>,
+            {
+                type Output = $f;
+                fn ln_sum_exp(mut self) -> Self::Output {
+                    let mut m_old = $f::NEG_INFINITY;
+                    let mut sum: $f = 0.0;
+                    while let Some(v_i) = self.next() {
+                        if v_i != $f::NEG_INFINITY {
+                            if v_i.is_nan() {
+                                return v_i
+                            } else {
+                                let m_new = m_old.max(v_i);
+                                sum = sum * (m_old - m_new).exp() + (v_i - m_new).exp();
+                                m_old = m_new;
+                            }
+                        }
+                    }
+                    if m_old == $f::INFINITY {
+                        m_old
+                    } else {
+                        m_old + sum.ln()
+                    }
+                }
+            }
+
+            impl<'a, U> LogSumExp<&'a $f> for U
+            where
+                U: Iterator<Item = &'a $f>,
+            {
+                type Output = $f;
+                fn ln_sum_exp(mut self) -> Self::Output {
+                    let mut m_old = $f::NEG_INFINITY;
+                    let mut sum: $f = 0.0;
+                    while let Some(v_i) = self.next() {
+                        if *v_i != $f::NEG_INFINITY {
+                            if v_i.is_nan() {
+                                return *v_i
+                            } else {
+                                let m_new = m_old.max(*v_i);
+                                sum = sum * (m_old - m_new).exp() + (*v_i - m_new).exp();
+                                m_old = m_new;
+                            }
+                        }
+                    }
+                    if m_old == $f::INFINITY {
+                        m_old
+                    } else {
+                        m_old + sum.ln()
+                    }
+                }
+            }
+        )+
+
+    }
+}
+impl_logsumexp! { f64 f32 }
 
 #[cfg(test)]
 mod tests {

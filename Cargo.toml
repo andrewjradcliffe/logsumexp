@@ -2,8 +2,12 @@
 name = "logsumexp"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Andrew Radcliffe <andrewjradcliffe@gmail.com>"]
+description = "Numerically stable computation of log-sum-exp using a 1-pass algorithm"
+repository = "https://github.com/andrewjradcliffe/logsumexp/"
+license = "MIT OR Apache-2.0"
+keywords = ["math", "numerics", "logsumexp"]
+categories = ["mathematics", "algorithms"]
 
 [dependencies]
 lnexp = "0.2.0"

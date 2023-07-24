@@ -200,189 +200,195 @@ mod tests {
     ln_add_exp_tests! { f64_logaddexp_impl f64 }
     ln_add_exp_tests! { f32_logaddexp_impl f32 }
 
-    #[cfg(test)]
-    mod f64_logsumexp_impl {
-        use super::*;
+    macro_rules! ln_sum_exp_tests {
+        { $name:ident $f:ident } => {
+            #[cfg(test)]
+            mod $name {
+                use super::*;
 
-        #[test]
-        fn ln_sum_exp_works() {
-            let inf: f64 = f64::INFINITY;
-            let neg_inf: f64 = f64::NEG_INFINITY;
-            let nan: f64 = f64::NAN;
-            let x: f64 = 0.5;
-            let y: f64 = 1.0;
+                #[test]
+                fn ln_sum_exp_works() {
+                    let inf: $f = $f::INFINITY;
+                    let neg_inf: $f = $f::NEG_INFINITY;
+                    let nan: $f = $f::NAN;
+                    let x: $f = 0.5;
+                    let y: $f = 1.0;
 
-            // Cases
-            let v = vec![neg_inf, x, neg_inf, neg_inf];
-            let rhs: f64 = x;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    // Cases
+                    let v = vec![neg_inf, x, neg_inf, neg_inf];
+                    let rhs: $f = x;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![neg_inf, x, y, neg_inf];
-            let rhs: f64 = y + ((x - y).exp() + 1.0).ln();
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![neg_inf, x, y, neg_inf];
+                    let rhs: $f = y + ((x - y).exp() + 1.0).ln();
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![inf, x, y, neg_inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![inf, x, y, neg_inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![x, inf, y, neg_inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![x, inf, y, neg_inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![neg_inf, inf, x, y];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![neg_inf, inf, x, y];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![neg_inf; 4];
-            let rhs: f64 = neg_inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![neg_inf; 4];
+                    let rhs: $f = neg_inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![inf; 4];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![inf; 4];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![neg_inf, neg_inf, neg_inf, inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![neg_inf, neg_inf, neg_inf, inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![inf, neg_inf, neg_inf, neg_inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![inf, neg_inf, neg_inf, neg_inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![inf, inf, y, neg_inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![inf, inf, y, neg_inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![inf, neg_inf, neg_inf, inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![inf, neg_inf, neg_inf, inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![neg_inf, neg_inf, neg_inf, x];
-            let rhs: f64 = x;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![neg_inf, neg_inf, neg_inf, x];
+                    let rhs: $f = x;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v = vec![x, neg_inf, neg_inf, neg_inf];
-            let rhs: f64 = x;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v = vec![x, neg_inf, neg_inf, neg_inf];
+                    let rhs: $f = x;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            // Edge cases
-            let v: Vec<f64> = vec![];
-            let rhs: f64 = neg_inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    // Edge cases
+                    let v: Vec<$f> = vec![];
+                    let rhs: $f = neg_inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v: Vec<f64> = vec![neg_inf];
-            let rhs: f64 = neg_inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v: Vec<$f> = vec![neg_inf];
+                    let rhs: $f = neg_inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v: Vec<f64> = vec![inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v: Vec<$f> = vec![inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v: Vec<f64> = vec![x];
-            let rhs: f64 = x;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v: Vec<$f> = vec![x];
+                    let rhs: $f = x;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v: Vec<f64> = vec![0.0];
-            let rhs: f64 = 0.0;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v: Vec<$f> = vec![0.0];
+                    let rhs: $f = 0.0;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v: Vec<f64> = vec![x, inf];
-            let rhs: f64 = inf;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v: Vec<$f> = vec![x, inf];
+                    let rhs: $f = inf;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            let v: Vec<f64> = vec![x, neg_inf];
-            let rhs: f64 = x;
-            assert_eq!(v.iter().ln_sum_exp(), rhs);
-            assert_eq!(v.into_iter().ln_sum_exp(), rhs);
+                    let v: Vec<$f> = vec![x, neg_inf];
+                    let rhs: $f = x;
+                    assert_eq!(v.iter().ln_sum_exp(), rhs);
+                    assert_eq!(v.into_iter().ln_sum_exp(), rhs);
 
-            // Cases involving nan
-            let v = vec![x, inf, nan, y];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    // Cases involving nan
+                    let v = vec![x, inf, nan, y];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![nan, x, y, inf];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![nan, x, y, inf];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![inf, inf, x, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![inf, inf, x, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![inf, inf, neg_inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![inf, inf, neg_inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![inf, inf, inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![inf, inf, inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![neg_inf, neg_inf, neg_inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![neg_inf, neg_inf, neg_inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![neg_inf, neg_inf, inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![neg_inf, neg_inf, inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![x, y, nan, inf];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![x, y, nan, inf];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![x, y, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![x, y, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![x, nan, y];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![x, nan, y];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v = vec![nan, x, y];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v = vec![nan, x, y];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            // Edge cases
-            let v: Vec<f64> = vec![nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    // Edge cases
+                    let v: Vec<$f> = vec![nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v: Vec<f64> = vec![nan; 4];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v: Vec<$f> = vec![nan; 4];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v: Vec<f64> = vec![neg_inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v: Vec<$f> = vec![neg_inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v: Vec<f64> = vec![inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v: Vec<$f> = vec![inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v: Vec<f64> = vec![neg_inf, inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v: Vec<$f> = vec![neg_inf, inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
 
-            let v: Vec<f64> = vec![inf, neg_inf, nan];
-            assert!(v.iter().ln_sum_exp().is_nan());
-            assert!(v.into_iter().ln_sum_exp().is_nan());
+                    let v: Vec<$f> = vec![inf, neg_inf, nan];
+                    assert!(v.iter().ln_sum_exp().is_nan());
+                    assert!(v.into_iter().ln_sum_exp().is_nan());
+                }
+            }
         }
     }
+    ln_sum_exp_tests! { f64_logsumexp_impl f64 }
+    ln_sum_exp_tests! { f32_logsumexp_impl f32 }
 }

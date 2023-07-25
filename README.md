@@ -4,7 +4,7 @@
 
 Provides two traits:
 * `LogAddExp`, which provides a numerically stable evaluation of
-  `log(exp(a) + exp(b))`, utilizing `ln_1p_exp` from the `lnexp`
+  `ln(exp(a) + exp(b))`, utilizing `ln_1p_exp` from the `lnexp`
   crate. Implementations are provided for for `f64` and `f32` (and
   their respective references).
 * `LogSumExp`, which provides a numerically stable, 1-pass algorithm

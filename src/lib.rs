@@ -1,13 +1,13 @@
 //! # logsumexp
 //!
-//! Numerically stable evaluation of `log(exp(a) + exp(b))` via the `LogAddExp` trait,
+//! Numerically stable evaluation of `ln(exp(a) + exp(b))` via the `LogAddExp` trait,
 //! and a numerically stable, 1-pass algorithm for evaluation of [LogSumExp](https://en.wikipedia.org/wiki/LogSumExp)
 //! via the `LogSumExp` trait.
 
 use lnexp::LnExp;
 
 /// A trait which, for the type on which it is implemented,
-/// provides numerically-stable evaluation of `log(exp(a) + exp(b))`.
+/// provides numerically-stable evaluation of `ln(exp(a) + exp(b))`.
 /// The provided implementations on `f64` and `f32` utilize [`ln_1p_exp`](https://docs.rs/lnexp/0.2.0/lnexp/trait.LnExp.html#tymethod.ln_1p_exp)
 /// for maximum stability.
 pub trait LogAddExp<Rhs = Self> {

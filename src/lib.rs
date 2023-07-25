@@ -68,8 +68,8 @@ impl_logaddexp! { f64 f32 }
 
 /// A trait for computing the log of the sum of exponentials of a sequence
 /// in a numerically-stable manner, using a 1-pass algorithm based on
-/// [Milakov, Maxim, and Natalia Gimelshein. "Online normalizer calculation for softmax." arXiv preprint arXiv:1805.02867 (2018)](https://arxiv.org/pdf/1805.02867.pdf).
-/// In contrast to the original, this algorithm correctly handles +/-infinity and `nan` values
+/// [Milakov, Maxim, and Natalia Gimelshein. "Online normalizer calculation for softmax." (2018)](https://arxiv.org/pdf/1805.02867.pdf).
+/// In contrast to the version described in the reference, this algorithm correctly handles +/-infinity and `nan` values
 /// at any point in the sequence.
 pub trait LogSumExp<T, U: Iterator<Item = T>> {
     type Output;
@@ -80,6 +80,7 @@ pub trait LogSumExp<T, U: Iterator<Item = T>> {
     /// ```
     /// use logsumexp::LogSumExp;
     ///
+    /// // iteration by reference or by value
     /// let v: Vec<f64> = [0.5_f64, 0.3, 0.1, 0.7].into_iter().map(|x| x.ln()).collect();
     /// let rhs: f64 = (1.6_f64).ln();
     /// assert!((v.iter().ln_sum_exp() -  rhs).abs() < f64::EPSILON);
@@ -94,6 +95,33 @@ pub trait LogSumExp<T, U: Iterator<Item = T>> {
     /// let rhs: f64 = 0.3;
     /// let log_mean = v.into_iter().map(|x| x.ln()).ln_sum_exp() - (n as f64).ln();
     /// assert!((log_mean.exp() - rhs).abs() < f64::EPSILON);
+    ///
+    /// // handle +/- infinity
+    /// let inf: f64 = f64::INFINITY;
+    ///
+    /// let v: Vec<f64> = vec![-inf, 0.5];
+    /// assert_eq!(v.iter().ln_sum_exp(), 0.5);
+    ///
+    /// let v: Vec<f64> = vec![inf, 0.5];
+    /// assert_eq!(v.iter().ln_sum_exp(), inf);
+    ///
+    /// let v: Vec<f64> = vec![inf; 2];
+    /// assert_eq!(v.iter().ln_sum_exp(), inf);
+    ///
+    /// let v: Vec<f64> = vec![-inf; 2];
+    /// assert_eq!(v.iter().ln_sum_exp(), -inf);
+    ///
+    /// // handle `nan`
+    /// let nan: f64 = f64::NAN;
+    ///
+    /// let v: Vec<f64> = vec![0.5, nan];
+    /// assert!(v.iter().ln_sum_exp().is_nan());
+    ///
+    /// let v: Vec<f64> = vec![inf, 0.5, nan];
+    /// assert!(v.iter().ln_sum_exp().is_nan());
+    ///
+    /// let v: Vec<f64> = vec![-inf, 0.5, nan];
+    /// assert!(v.iter().ln_sum_exp().is_nan());
     /// ```
     fn ln_sum_exp(self) -> Self::Output;
 }

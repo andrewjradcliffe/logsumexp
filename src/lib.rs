@@ -1,7 +1,38 @@
+//! # logsumexp
+//!
+//! Numerically stable evaluation of `log(exp(a) + exp(b))` via the `LogAddExp` trait,
+//! and a numerically stable, 1-pass algorithm for evaluation of [LogSumExp](https://en.wikipedia.org/wiki/LogSumExp)
+//! via the `LogSumExp` trait.
+
 use lnexp::LnExp;
 
+/// A trait which, for the type on which it is implemented,
+/// provides numerically-stable evaluation of `log(exp(a) + exp(b))`.
+/// The provided implementations on `f64` and `f32` utilize [`ln_1p_exp`](https://docs.rs/lnexp/0.2.0/lnexp/trait.LnExp.html#tymethod.ln_1p_exp)
+/// for maximum stability.
 pub trait LogAddExp<Rhs = Self> {
     type Output;
+
+    /// Return the log of the sum of exponentials of `self` and `rhs`.
+    ///
+    /// # Examples
+    /// ```
+    /// use logsumexp::LogAddExp;
+    ///
+    /// let x: f64 = 0.5;
+    /// let y: f64 = 1.0;
+    /// let z: f64 = (x.exp() + y.exp()).ln();
+    /// assert_eq!(x.ln_add_exp(y), z);
+    /// assert_eq!(x.ln_add_exp(&y), z);
+    /// assert_eq!((&x).ln_add_exp(y), z);
+    /// assert_eq!((&x).ln_add_exp(&y), z);
+    ///
+    /// let x: f64 = 1023.0;
+    /// let y: f64 = 511.0;
+    /// assert_eq!(x.ln_add_exp(y), x);
+    /// // compare to naive computation
+    /// assert_eq!((x.exp() + y.exp()).ln(), f64::INFINITY);
+    /// ```
     fn ln_add_exp(&self, rhs: Rhs) -> Self::Output;
 }
 

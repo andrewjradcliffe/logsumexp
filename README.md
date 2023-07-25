@@ -7,7 +7,7 @@ Provides two traits:
   `ln(exp(a) + exp(b))`, utilizing `ln_1p_exp` from the `lnexp`
   crate. Implementations are provided for for `f64` and `f32` (and
   their respective references).
-* `LogSumExp`, which provides a numerically stable, 1-pass algorithm
+* `LogSumExp`, which provides a numerically stable, 1-pass (online) algorithm
   for evaluation of
   [LogSumExp](https://en.wikipedia.org/wiki/LogSumExp) with correct
   handling of +/- infinity and `nan`. Implementations are provided

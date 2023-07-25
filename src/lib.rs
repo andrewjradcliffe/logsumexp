@@ -1,14 +1,14 @@
 //! # logsumexp
 //!
 //! Numerically stable evaluation of `ln(exp(a) + exp(b))` via the `LogAddExp` trait,
-//! and a numerically stable, 1-pass algorithm for evaluation of [LogSumExp](https://en.wikipedia.org/wiki/LogSumExp)
+//! and a numerically stable, 1-pass (online) algorithm for evaluation of [LogSumExp](https://en.wikipedia.org/wiki/LogSumExp)
 //! via the `LogSumExp` trait.
 
 use lnexp::LnExp;
 
 /// A trait which, for the type on which it is implemented,
 /// provides numerically-stable evaluation of `ln(exp(a) + exp(b))`.
-/// The provided implementations on `f64` and `f32` utilize [`ln_1p_exp`](https://docs.rs/lnexp/0.2.0/lnexp/trait.LnExp.html#tymethod.ln_1p_exp)
+/// The implementations provided for `f64` (and `&f64`) and `f32` (and `&f32`) utilize [`ln_1p_exp`](https://docs.rs/lnexp/0.2.0/lnexp/trait.LnExp.html#tymethod.ln_1p_exp)
 /// for maximum stability.
 pub trait LogAddExp<Rhs = Self> {
     type Output;
@@ -67,7 +67,7 @@ macro_rules! impl_logaddexp {
 impl_logaddexp! { f64 f32 }
 
 /// A trait for computing the log of the sum of exponentials of a sequence
-/// in a numerically-stable manner, using a 1-pass algorithm based on
+/// in a numerically-stable manner, using a 1-pass (online) algorithm based on
 /// [Milakov, Maxim, and Natalia Gimelshein. "Online normalizer calculation for softmax." (2018)](https://arxiv.org/pdf/1805.02867.pdf).
 /// In contrast to the version described in the reference, this algorithm correctly handles +/-infinity and `nan` values
 /// at any point in the sequence.

@@ -490,6 +490,21 @@ mod tests {
                     let rhs: $f = $f::ln(3.0);
                     assert!((iter.ln_sum_exp() -  rhs).abs() < 2.0 * $f::EPSILON);
                 }
+
+                #[test]
+                fn ln_sum_exp_associativity_works() {
+                    use std::iter;
+                    let v: Vec<$f> = vec![0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+                    let (whole, frac): (Vec<$f>, Vec<$f>) = v.iter().partition(|x| (*x).floor() == **x);
+                    let iter = iter::once(whole.iter().ln_sum_exp()).chain(iter::once(frac.iter().ln_sum_exp()));
+                    assert_eq!(v.iter().ln_sum_exp(), iter.ln_sum_exp());
+
+                    let (whole_even, whole_odd): (Vec<$f>, Vec<$f>) = whole.iter().partition(|x| **x % 2.0 == 0.0);
+                    let (frac_even, frac_odd): (Vec<$f>, Vec<$f>) = frac.iter().partition(|x| **x % 2.0 == 0.0);
+                    let iter = iter::once(whole_even.iter().ln_sum_exp()).chain(iter::once(frac_even.iter().ln_sum_exp())).chain(iter::once(whole_odd.iter().ln_sum_exp())).chain(iter::once(frac_odd.iter().ln_sum_exp()));
+                    assert!((v.iter().ln_sum_exp()- iter.ln_sum_exp()).abs() < 4.0 * $f::EPSILON);
+
+                }
             }
         }
     }
